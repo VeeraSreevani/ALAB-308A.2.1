@@ -41,64 +41,61 @@ console.log("**********************************");
 //Part 2: Class Fantasy
 // Here is what the basic Character class looks like so far, including a constructor function that allows us to create new characters with whatever name we would like:
 class Character {
+  static MAX_HEALTH = 100;  //part 4:Add a static MAX_HEALTH property to the Character class, equal to 100.
   constructor (name) {
     this.name = name;
     this.health = 100;
     this.inventory = [];
   }
-//   Adding Methods:
-
-  // Every character should also be able to make rolls. Add the roll method to the Character class.
   roll(mod=0){
     const result = Math.floor(Math.random() * 20) + 1 + mod;
     console.log(`${this.name} rolled a ${result}.`);
+    
     }
-}
+  }
 
-
-// const robin = new Character("Robin");
-// robin.inventory = ["sword", "potion", "artifact"];
-// robin.companion = new Character("Leo");
-// robin.companion.type = "Cat";
-// robin.companion.companion = new Character("Frank");
-// robin.companion.companion.type = "Flea";
-// robin.companion.companion.inventory = ["small hat", "sunglasses"];
-
-// console.log(robin);
-// //Even the companions can roll now; give it a try!
-// robin.roll();
-// robin.companion.roll();
-// robin.companion.companion.roll();
 console.log("**************************************");
 
 // Part 3: Class Features:
-// Take a look at our example below, and 
-// class Adventurer extends Character {
-//   constructor (name, role) {
-//     super(name);
-    // Adventurers have specialized roles.
-//     this.role = role;
-    // Every adventurer starts with a bed and 50 gold coins.
-//     this.inventory.push("bedroll", "50 gold coins");
-//   }
-  // Adventurers have the ability to scout ahead of them.
-//   scout () {
-//     console.log(`${this.name} is scouting ahead...`);
-//     super.roll();
-//   }
-// }
 //expand upon it with your own properties and methods.
+
 class Adventurer extends Character {
+  static ROLES = ["Fighter","Healer", "Wizard"]; //Add a static ROLES array to the Adventurer class, with values “Fighter,” “Healer,” and “Wizard.” 
     constructor (name, role) {
       super(name);
+
       this.role = role;
-      this. level = 1; //starting level 1
-      this.lives = 3; // Adventurer starting with 3 lives
+      this. level = 1;  //starting level 1
+      this.lives = 3;   // Adventurer starting with 3 lives
       this.experience = 0; // starting with 0 expo points
       this.inventory.push("bedroll", "50 gold coins");
-    // this.attack = 1;
+      //this.attack = 1;
   }
-  //method fro attack
+
+  //PART 5:
+  roll(){
+    return Math.floor(Math.random() * 10) + 1; 
+  }
+  duel(opponent){
+    console.log(`${this.name} is duelling ${opponent.name}`);
+    const thisRoll = this.roll(); // Roll for the current adventurer
+    const opponentRoll = opponent.roll(); // Roll for the opponent adventurer
+  
+    // Log the rolls
+    console.log(`${this.name} rolled: ${thisRoll}`);
+    console.log(`${opponent.name} rolled: ${opponentRoll}`);
+    if (thisRoll < opponentRoll) {
+      this.health -= 1;  // Current adventurer takes damage
+      console.log(`${this.name} takes 1 damage! Current health: ${this.health}`);}
+      else if (thisRoll > opponentRoll) {
+        opponent.health -= 1;  // Opponent takes damage
+        console.log(`${opponent.name} takes 1 damage! Current health: ${opponent.health}`);
+      } else {
+        console.log("It's a tie! No one takes damage.");
+      }
+  }
+  
+  //method for attack
   attack(target,damage)
   {
 
@@ -107,7 +104,7 @@ class Adventurer extends Character {
     console.log(`${target.name} has ${target.lives} lives remaining`)
     
   }
-  // methods
+
   //method to check the current level based on experience
   getLevel()
   {
@@ -172,7 +169,7 @@ respawn() {
   }
 }
 
-  scout () {
+scout () {
     console.log(`${this.name} is scouting ahead...`);
     super.roll();
   }
@@ -180,14 +177,27 @@ respawn() {
 //display information about the adventurer
   displayInfo() 
   {
+    // super.displayInfo();
     console.log(`Name: ${this.name}, Role: ${this.role}, Level: ${this.getLevel()}, Lives: ${this.lives}`);
   }
 }
 
+try{
+  const adventurer1 = new Adventurer("Brooke","Healer")
+  adventurer1.displayInfo();
+  
+  const adventurer2 = new Adventurer("Aaron","warrior")
+  adventurer2.displayInfo();
+}catch(error){
+  console.error(error.message);
+}
 
 //creating instance to the Adventurer class
 let robin = new Adventurer ("Robin",  "warrior")
 let monster= new Adventurer("Dylan")
+console.log("**********ROBIN DUELING WITH MONSTER::*********")
+robin.duel(monster);
+
 robin.inventory = ["sword", "potion", "artifact"];
 robin.companion = new Character("Leo");
 robin.companion.type = "Cat";
@@ -196,6 +206,7 @@ robin.companion.companion.type = "Flea";
 robin.companion.companion.inventory = ["small hat", "sunglasses"];
 
 console.log(robin);
+
 //Even the companions can roll now; give it a try!
 robin.roll();
 robin.companion.roll();
@@ -203,14 +214,10 @@ robin.companion.companion.roll();
 console.log(robin instanceof Adventurer)
 console.log(monster instanceof Adventurer)
 robin.attack(monster,1);
-
 robin.displayInfo();
-
 robin.gainExperience(3000); // Gain 1500 XP
 robin.displayInfo();
-
 robin.exposToNextLevel();
-
 robin.loseLife();
 robin.checkLives();
 robin.respawn();
@@ -245,3 +252,39 @@ robin.companion = leo;
 console.log(robin);
 console.log(leo);
 leo.displayInfo();
+
+
+//Part 5: Gather your Party
+
+class AdventurerFactory {  
+  constructor (role) {
+    this.role = role;
+    this.adventurers = [];
+  }
+  generate (name) {
+    const newAdventurer = new Adventurer(name, this.role);
+    this.adventurers.push(newAdventurer);
+    return newAdventurer;
+  }
+  findByIndex (index) {
+    return this.adventurers[index];
+  }
+  findByName (name) {
+    return this.adventurers.find((a) => a.name === name);
+  }
+}
+try{
+const healers = new AdventurerFactory("Healer");
+
+const Dylan = healers.generate("Dylan");
+Dylan.displayInfo();
+const Aaron = healers.generate("Aaron");
+Aaron.displayInfo();
+const Alice = healers.generate("Alice");
+Alice.displayInfo();
+const cliff = healers.generate("cliff");
+cliff.displayInfo();
+console.log(healers)
+}catch (error) {
+  console.error(error.message); // Warrior is not a valid role!
+}
